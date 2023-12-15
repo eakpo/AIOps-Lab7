@@ -1,0 +1,38 @@
+# monitor_frontend_cartservice.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitor-frontend-cartservice
+  labels:
+    app: monitor-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monitor-app
+  template:
+    metadata:
+      labels:
+        app: monitor-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"  # Use a unique port for each service pair
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: monitor-app
+        image: index.docker.io/eugeniaakpo/monitor:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        resources:
+          requests:
+            cpu: 200m
+        command:
+          - "python"
+        args:
+          - "monitor.py"
+          - "--service1=frontend"
+          - "--service2=cartservice"
+          - "--training_data_file=normal_traces_frontend_cartservice.json"
+          - "--prometheus_port=8081"

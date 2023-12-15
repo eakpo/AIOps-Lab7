@@ -1,0 +1,38 @@
+# monitor_checkoutservice_paymentservice.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitor-checkoutservice-paymentservice
+  labels:
+    app: monitor-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monitor-app
+  template:
+    metadata:
+      labels:
+        app: monitor-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"  # Use a unique port for each service pair
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: monitor-app
+        image: index.docker.io/eugeniaakpo/monitor:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+        resources:
+          requests:
+            cpu: 200m
+        command:
+          - "python"
+        args:
+          - "monitor.py"
+          - "--service1=checkoutservice"
+          - "--service2=paymentservice"
+          - "--training_data_file=normal_traces_check_payment.json"
+          - "--prometheus_port=8082"
